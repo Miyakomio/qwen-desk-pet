@@ -87,19 +87,22 @@ Window {
             Row {
                 width: parent.width
                 spacing: 6
-                // 头像：用户用「你」圆，桌宠用实际角色形象
+                // 头像：用户用「你」圆，桌宠用实际角色形象（开抗锯齿保清晰）
                 Rectangle {
-                    width: 32; height: 32; radius: 16
+                    width: 36; height: 36; radius: 18
                     clip: true
                     Image {
                         anchors.fill: parent
                         source: model.msgRole === "user" ? "" : (petFrameDir + "/01.png")
+                        sourceSize.width: 128
                         fillMode: Image.PreserveAspectCrop
+                        smooth: true
+                        mipmap: true
                         visible: model.msgRole !== "user"
                     }
                     Rectangle {
                         anchors.fill: parent
-                        radius: 16
+                        radius: 18
                         color: "#e8f0fe"
                         visible: model.msgRole === "user"
                         Text {
