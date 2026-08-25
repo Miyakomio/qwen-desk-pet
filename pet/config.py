@@ -75,6 +75,17 @@ BREAK_MESSAGES = {
 REPORT_TIME_ENABLED = True
 REPORT_TIME_AFTER_IDLE_MS = 10000   # 待机这么久(与隐身一致)后再触碰会报时
 
+# 整点报时（自动报当前时间，特殊时段有定制台词）
+CHIME_ENABLED = True
+CHIME_MESSAGES = {
+    0: "现在是午夜12点整啦，早点休息哦~",
+    7: "早上好呀，现在7点整，新的一天开始啦~",
+    8: "现在8点整，元气满满地开始吧！",
+    12: "现在12点整，记得按时吃午饭哦~",
+    18: "现在18点整，晚饭时间到啦，别饿着自己~",
+    22: "现在22点整，该准备睡觉啦~",
+}
+
 # 终端命令执行：在输入框输入 /+命令 会打开终端执行
 TERMINAL_ENABLED = True
 TERMINAL_PREFIX = "/+"   # 前缀，如 "/+dir" 执行 dir

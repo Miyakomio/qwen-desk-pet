@@ -40,6 +40,12 @@ class PetBridge(QObject):
             self._break_timer.timeout.connect(self._check_usage)
             self._break_timer.start()
             self._last_check = int(time.time() * 1000)
+        self._last_chime_hour = None
+        if config.CHIME_ENABLED:
+            self._chime_timer = QTimer(self)
+            self._chime_timer.setInterval(20000)
+            self._chime_timer.timeout.connect(self._check_chime)
+            self._chime_timer.start()
 
     def _auto_say(self, msg: str):
         """发一条自动消息（只显示，不入对话上下文，避免干扰）。"""
@@ -75,6 +81,23 @@ class PetBridge(QObject):
         from datetime import datetime
         now = datetime.now()
         self._auto_say(f"叮~ 现在{now.hour}点{now.minute}分啦！(๑•̀ㅂ•́)و✧")
+
+    def _check_chime(self):
+        """整点报时：每个整点(分钟为0)报一次当前时间。"""
+        if not config.CHIME_ENABLED or self._busy:
+            return
+        from datetime import datetime
+        now = datetime.now()
+        if now.minute != 0:
+            return
+        if self._last_chime_hour == now.hour:
+            return  # 这一小时已报过
+        self._last_chime_hour = now.hour
+        custom = config.CHIME_MESSAGES.get(now.hour)
+        if custom:
+            self._auto_say(custom)
+        else:
+            self._auto_say(f"叮~ 现在是{now.hour}点整啦！(๑•̀ㅂ•́)و✧")
 
     @Slot(str)
     def sendMessage(self, text: str):
