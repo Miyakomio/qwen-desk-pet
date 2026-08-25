@@ -87,16 +87,28 @@ Window {
             Row {
                 width: parent.width
                 spacing: 6
-                // 头像占位
+                // 头像：用户用「你」圆，桌宠用实际角色形象
                 Rectangle {
-                    width: 30; height: 30; radius: 15
-                    color: model.msgRole === "user" ? "#e8f0fe" : "#ffe3ef"
-                    Text {
-                        anchors.centerIn: parent
-                        text: model.msgRole === "user" ? "你" : "七"
-                        color: model.msgRole === "user" ? "#4a76c9" : "#c94f79"
-                        font.pixelSize: 13
-                        font.bold: true
+                    width: 32; height: 32; radius: 16
+                    clip: true
+                    Image {
+                        anchors.fill: parent
+                        source: model.msgRole === "user" ? "" : (petFrameDir + "/01.png")
+                        fillMode: Image.PreserveAspectCrop
+                        visible: model.msgRole !== "user"
+                    }
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: 16
+                        color: "#e8f0fe"
+                        visible: model.msgRole === "user"
+                        Text {
+                            anchors.centerIn: parent
+                            text: "你"
+                            color: "#4a76c9"
+                            font.pixelSize: 13
+                            font.bold: true
+                        }
                     }
                 }
                 // 消息气泡
