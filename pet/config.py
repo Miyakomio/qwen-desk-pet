@@ -81,3 +81,7 @@ CHIME_MESSAGES = {
     18: "现在18点整，晚饭时间到啦，别饿着自己~",
     22: "现在22点整，该准备睡觉啦~",
 }
+
+# 终端命令执行：在输入框输入 /+命令 会打开终端执行
+TERMINAL_ENABLED = True
+TERMINAL_PREFIX = "/+"   # 前缀，如 "/+dir" 执行 dir

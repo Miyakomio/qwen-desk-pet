@@ -4,7 +4,7 @@ import time
 from PySide6.QtCore import QObject, QTimer, Signal, Slot
 
 from . import config
-from .core import emotion as emotion_mod, usage
+from .core import emotion as emotion_mod, terminal, usage
 from .core.memory import ChatMemory
 from .core.message_model import MessageModel
 from .llm.client import ChatWorker, SummarizeWorker
@@ -96,6 +96,12 @@ class PetBridge(QObject):
         text = text.strip()
         if not text or self._busy:
             return
+
+        # 终端命令模式：/+命令 打开终端执行
+        if config.TERMINAL_ENABLED and text.startswith(config.TERMINAL_PREFIX):
+            self._handle_terminal(text)
+            return
+
         # 用户消息
         self.memory.add("user", text)
         self.messageModel.add("user", text)
@@ -169,6 +175,24 @@ class PetBridge(QObject):
         """清空记忆。"""
         self.memory.clear()
         self.messageModel.clear()
+
+    def _handle_terminal(self, text: str):
+        """处理 /+命令：打开终端执行。不入对话记忆。"""
+        cmd = text[len(config.TERMINAL_PREFIX):].strip()
+        self.messageModel.add("user", text)
+        self.userMessage.emit(text)
+        self._busy = True
+        self.thinking.emit(True)
+        if cmd:
+            ok = terminal.run_in_terminal(cmd)
+            reply = f"好嘞，已打开终端执行：{cmd}" if ok else f"呜，打开终端执行「{cmd}」失败啦~"
+        else:
+            reply = f"想让我执行命令的话，输入 {config.TERMINAL_PREFIX}命令 哦，比如 {config.TERMINAL_PREFIX}dir"
+        self.messageModel.add("assistant", reply)
+        self.botMessage.emit(reply)
+        self.emotion.emit("happy")
+        self._busy = False
+        self.thinking.emit(False)
 
     @Slot(bool)
     def setShowSources(self, on: bool):
