@@ -9,6 +9,16 @@ Rectangle {
     property string fullText: ""       // 助手完整回复
     property bool thinking: false      // 是否正在思考
     property int shown: 0              // 打字机已显示的字符数
+    property int _thinkIdx: 0
+    property var thinkLines: [
+        "小小的脑袋转成浆糊啦喵…",
+        "唔…正在用力思考~",
+        "转转小脑袋想想~",
+        "啊…差点短路啦！",
+        "脑袋瓜在冒烟中…",
+        "嗯…让祈祈捋一捋~",
+        "呜…想不出！再想想~",
+    ]
 
     width: 204
     radius: 14
@@ -41,6 +51,17 @@ Rectangle {
                 // 打完后自动滚到底部
                 flick.contentY = flick.contentHeight - flick.height
             }
+        }
+    }
+
+    // 思考文字轮换
+    Timer {
+        id: thinkTimer
+        interval: 1300
+        repeat: true
+        running: bubble.thinking
+        onTriggered: {
+            bubble._thinkIdx = (bubble._thinkIdx + 1) % bubble.thinkLines.length
         }
     }
 
@@ -84,24 +105,14 @@ Rectangle {
                 visible: !bubble.thinking
             }
 
-            // 思考动画：三个跳动的小点
-            Row {
+            // 思考动画：可爱呆萌的旋转文字
+            Text {
                 visible: bubble.thinking
                 anchors.left: parent.left
-                spacing: 5
-                Repeater {
-                    model: 3
-                    Rectangle {
-                        width: 6; height: 6; radius: 3
-                        color: "#ff8fb3"
-                        SequentialAnimation on opacity {
-                            loops: Animation.Infinite
-                            running: bubble.thinking
-                            NumberAnimation { from: 0.25; to: 1; duration: 320; easing.type: Easing.InOutQuad }
-                            NumberAnimation { from: 1; to: 0.25; duration: 320 }
-                        }
-                    }
-                }
+                text: bubble.thinkLines[bubble._thinkIdx]
+                color: "#c9a0ae"
+                font.pixelSize: 12
+                font.family: "Microsoft YaHei"
             }
         }
     }
