@@ -8,6 +8,7 @@
 - **久坐提醒**：累计使用电脑 1/2/3/4/5 小时，各提醒一次休息
 - **整点报时**：每到整点自动报当前时间（7/12/18/22 点等有定制台词）
 - **触碰报时**：待机隐藏一段时间后，触碰/点击桌宠会实时报当前时间
+- **日程表提醒**：独立窗口填写「时间+事件」，提前10分钟告知、到点再提醒一次
 - **终端执行**：在输入框输入 **`/+命令`**，祈りちゃん会打开终端执行该命令
 - 打字机文字效果 + 聊天历史记忆（多轮上下文）
 - **自动消息不干扰上下文**：久坐提醒、整点/触碰报时等系统消息只显示，不进入对话记忆，不影响连贯性
@@ -148,6 +149,8 @@ py -3 -m venv .venv
 | `REPORT_TIME_ENABLED` | 触碰报时开关 | `True` |
 | `REPORT_TIME_AFTER_IDLE_MS` | 待机多久后触碰才报时 | `10000` |
 | `CHIME_ENABLED` | 整点报时开关 | `True` |
+| `SCHEDULE_ENABLED` | 日程提醒开关 | `True` |
+| `SCHEDULE_PRE_NOTIFY_SEC` | 提前多久告知 | `600`(10分钟) |
 | `TERMINAL_ENABLED` | 终端命令（`/+`）开关 | `True` |
 | `PAT_REPLIES`/`POKE_REPLIES` | 摸头/捏脸台词 | 见文件 |
 | `SYSTEM_PROMPT` | 祈りちゃん的人设 | 见文件 |
@@ -171,13 +174,16 @@ pet/
 │   └── client.py    # Ollama 调用（后台线程 + 摘要压缩）
 ├── search/
 │   └── client.py    # 联网搜索（DuckDuckGo + 维基回退）
+├── schedule/
+│   └── client.py    # 日程表管理（提前10分钟+到点提醒）
 ├── resources/
 │   └── pets/        # 桌宠形象素材帧
 └── qml/
     ├── PetWindow.qml    # 主窗口（紧凑布局、隐身、互动）
     ├── Character.qml    # 角色（待机动画 + 摸头/捏脸）
     ├── ChatBubble.qml   # 气泡（打字机 + 滚动 + 思考动画）
-    └── ChatWindow.qml   # 展开的对话记录窗口
+    ├── ChatWindow.qml   # 展开的对话记录窗口
+    └── ScheduleWindow.qml # 日程表窗口
 ```
 
 ## 🔮 后续规划（电脑控制模块预留）

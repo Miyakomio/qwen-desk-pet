@@ -60,6 +60,13 @@ def main():
     engine.rootContext().setContextProperty("petBridge", bridge)
     engine.rootContext().setContextProperty("messageModel", bridge.messageModel)
 
+    # 日程表
+    from pet.schedule.client import ScheduleManager
+    schedule_manager = ScheduleManager()
+    engine.rootContext().setContextProperty("scheduleManager", schedule_manager)
+    engine.rootContext().setContextProperty("scheduleModel", schedule_manager.model)
+    schedule_manager.remind.connect(bridge.on_schedule_remind)
+
     # 桌宠形象帧目录与帧数
     pets_dir = os.path.join(os.path.dirname(__file__), "resources", "pets", config.PET_CHARACTER)
     if not os.path.isdir(pets_dir):
@@ -92,6 +99,13 @@ def main():
         chat_win = engine.rootObjects()[-1]
         chat_win.hide()
         engine.rootContext().setContextProperty("chatWindow", chat_win)
+
+    # 日程表窗口（默认隐藏，由桌宠上的按钮唤出）
+    engine.load(QUrl.fromLocalFile(os.path.join(qml_dir, "ScheduleWindow.qml")))
+    if len(engine.rootObjects()) >= 3:
+        sched_win = engine.rootObjects()[-1]
+        sched_win.hide()
+        engine.rootContext().setContextProperty("scheduleWindow", sched_win)
 
     _log(f"窗口已创建: {type(window).__name__}, 尺寸 {window.width()}x{window.height()}")
 

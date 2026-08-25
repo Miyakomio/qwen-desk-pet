@@ -53,6 +53,10 @@ class PetBridge(QObject):
         self.botMessage.emit(msg)
         self.emotion.emit("happy")
 
+    def on_schedule_remind(self, msg: str):
+        """日程提醒 → 显示到气泡。"""
+        self._auto_say(msg)
+
     def _check_usage(self):
         """累计"正在使用电脑"的时长，到 1/2/3/4/5 小时各提醒一次。"""
         if not config.BREAK_REMIND_ENABLED or self._busy:

@@ -39,6 +39,7 @@ Window {
             inputRow.opacity = 1
             expandBtn.opacity = 1
             closeBtn.opacity = 1
+            schedBtn.opacity = 1
             return
         }
         var el = Date.now() - root.idleSince
@@ -50,6 +51,7 @@ Window {
         inputRow.opacity = t
         expandBtn.opacity = btnT
         closeBtn.opacity = btnT
+        schedBtn.opacity = btnT
     }
 
     // 背景拖拽层（左/右键都可拖动；点击/触碰会唤回界面）
@@ -87,6 +89,29 @@ Window {
             anchors.fill: parent
             hoverEnabled: true
             onClicked: { chatWindow.show(); chatWindow.raise(); chatWindow.requestActivate() }
+        }
+    }
+
+    // 日程表按钮（打开独立日程窗口）
+    Rectangle {
+        id: schedBtn
+        anchors.top: expandBtn.bottom
+        anchors.left: parent.left
+        anchors.topMargin: 4
+        anchors.leftMargin: 8
+        width: 22; height: 22
+        radius: 11
+        color: "transparent"
+        Behavior on opacity { NumberAnimation { duration: 500 } }
+        Text {
+            anchors.centerIn: parent
+            text: "📅"
+            font.pixelSize: 13
+        }
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            onClicked: { scheduleWindow.show(); scheduleWindow.raise(); scheduleWindow.requestActivate() }
         }
     }
 

@@ -89,3 +89,8 @@ CHIME_MESSAGES = {
 # 终端命令执行：在输入框输入 /+命令 会打开终端执行
 TERMINAL_ENABLED = True
 TERMINAL_PREFIX = "/+"   # 前缀，如 "/+dir" 执行 dir
+
+# 日程表提醒
+SCHEDULE_ENABLED = True
+SCHEDULE_CHECK_INTERVAL_MS = 30000   # 每30秒检查一次日程
+SCHEDULE_PRE_NOTIFY_SEC = 600        # 提前600秒(10分钟)告知
