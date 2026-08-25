@@ -29,6 +29,7 @@ class PetBridge(QObject):
         self._summarizing = False
         self._pending_sources = []     # 本次回答附带的结果来源
         self.show_sources = config.SHOW_SOURCES
+        self._last_time_report = 0     # 上次报时时间(防刷屏)
 
         # 久坐提醒 + 整点报时
         self._active_ms = 0
@@ -79,15 +80,19 @@ class PetBridge(QObject):
 
     @Slot(int)
     def reportTime(self, idle_ms: int):
-        """待机一段时间后触碰桌宠时，实时报当前时间。"""
+        """待机一段时间后触碰桌宠时，实时报当前时间（带冷却防刷屏）。"""
         if not config.REPORT_TIME_ENABLED or idle_ms < config.REPORT_TIME_AFTER_IDLE_MS:
             return
+        now_ts = time.time()
+        if now_ts - self._last_time_report < config.REPORT_TIME_COOLDOWN_SEC:
+            return
+        self._last_time_report = now_ts
         from datetime import datetime
         now = datetime.now()
-        self._auto_say(f"叮~ 现在{now.hour}点{now.minute}分啦！(๑•̀ㅂ•́)و✧")
+        self._auto_say(f"已经{now:%H:%M}了喵，记得注意时间哦")
 
     def _check_chime(self):
-        """整点报时：每个整点(分钟为0)报一次当前时间。"""
+        """整点报时：每个整点(分钟为0)按「已经HH:MM:SS了喵，记得…哦」格式报一次。"""
         if not config.CHIME_ENABLED or self._busy:
             return
         from datetime import datetime
@@ -97,11 +102,8 @@ class PetBridge(QObject):
         if self._last_chime_hour == now.hour:
             return  # 这一小时已报过
         self._last_chime_hour = now.hour
-        custom = config.CHIME_MESSAGES.get(now.hour)
-        if custom:
-            self._auto_say(custom)
-        else:
-            self._auto_say(f"叮~ 现在是{now.hour}点整啦！(๑•̀ㅂ•́)و✧")
+        tail = config.CHIME_MESSAGES.get(now.hour, "记得休息一下哦")
+        self._auto_say(f"已经{now:%H:%M}了喵，{tail}")
 
     @Slot(str)
     def sendMessage(self, text: str):
