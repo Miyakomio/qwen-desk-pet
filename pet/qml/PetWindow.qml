@@ -102,7 +102,7 @@ Window {
         }
         MouseArea {
             anchors.fill: parent
-            onClicked: root.hide()
+            onClicked: Qt.quit()   // 直接退出进程
         }
     }
 
