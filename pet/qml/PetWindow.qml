@@ -92,13 +92,13 @@ Window {
         }
     }
 
-    // 日程表按钮（打开独立日程窗口）
+    // 日程表按钮（在 ☰ 右边）
     Rectangle {
         id: schedBtn
-        anchors.top: expandBtn.bottom
-        anchors.left: parent.left
-        anchors.topMargin: 4
-        anchors.leftMargin: 8
+        anchors.top: expandBtn.top
+        anchors.left: expandBtn.right
+        anchors.topMargin: 0
+        anchors.leftMargin: 4
         width: 22; height: 22
         radius: 11
         color: "transparent"

@@ -44,6 +44,8 @@ def _make_icon() -> QIcon:
 
 
 def main():
+    # 让 Qt Quick Controls 支持自定义背景（如日程窗口的输入框）
+    os.environ.setdefault("QT_QUICK_CONTROLS_STYLE", "Basic")
     # pythonw(无控制台) 下 stdout/stderr 为 None，重定向到空设备避免崩溃
     if sys.stdout is None:
         sys.stdout = open(os.devnull, "w")
