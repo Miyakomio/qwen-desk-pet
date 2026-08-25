@@ -106,11 +106,11 @@ class ScheduleManager(QObject):
             if not it["notified_pre"] and 0 < rem <= config.SCHEDULE_PRE_NOTIFY_SEC:
                 it["notified_pre"] = True
                 mins = max(1, int(round(rem / 60)))
-                msgs.append(f"祈祈提醒：还有约{mins}分钟就要「{it['event']}」啦~")
+                msgs.append(f"已经{now:%H:%M:%S}了喵，还有约{mins}分钟就要「{it['event']}」啦哦")
             # 到时间提醒（一次）
             if not it["notified_at"] and rem <= 0 and rem > -3600:
                 it["notified_at"] = True
-                msgs.append(f"时间到啦！该「{it['event']}」啦~")
+                msgs.append(f"已经{now:%H:%M:%S}了喵，记得该「{it['event']}」哦")
         if msgs:
             self._save()
         return msgs
