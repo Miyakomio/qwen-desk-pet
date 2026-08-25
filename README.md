@@ -2,7 +2,7 @@
 
 一个用 **Python + PySide6 (Qt/QML)** 做的本地二次元桌宠，调用你本地 Ollama 部署的 **qwen3:0.6b** 进行对话。
 
-- 透明、无边框、置顶、可拖动的桌宠窗口（**小巧**，250×380）
+- 透明、无边框、置顶、可拖动的桌宠窗口（**小巧**，220×330）
 - **现成透明桌宠素材**（绝区零「Codex」小机器人，**自带待机动画**，会轻轻晃动）
 - **性格**：祈りちゃん，俏皮活泼、元气满满，爱撒娇冒颜文字
 - **久坐提醒**：累计使用电脑 1/2/3/4/5 小时，各提醒一次休息
@@ -13,7 +13,7 @@
 - **长对话自动压缩记忆**：聊久了会自动把较早内容总结成摘要，上下文更连贯
 - **可展开的对话窗口**：点桌宠左上角「☰」打开独立对话记录窗口，查看全部历史、可滚动、可继续聊
 - 根据回复内容自动切换表情
-- **联网搜索**：说「搜/查/百度…」等词时自动上网找结果并带来源
+- **联网搜索**：说「搜/查/百度…」等词、或真正的问题时自动上网找结果并带来源；寒暄闲聊则不联网，保证对话连贯
 - **可互动**：摸头、捏脸，会有表情和反应（独立弹幕，不打断对话）
 - 系统托盘（可隐藏/唤出）
 
@@ -64,18 +64,20 @@ py -3 -m venv .venv
 | 托盘图标 | 左键唤出，右键菜单：显示/隐藏、退出 |
 | 底部输入框回车 / ➤ | 发送消息给祈りちゃん |
 
-> 一段时间不互动后，对话气泡会先**变半透明**、再**完全隐身**（输入框一起藏起）；把鼠标移回桌宠就会恢复。
+> 一段时间不互动后，对话气泡会先**变半透明**、再**完全隐身**（输入框和 ☰/✕ 按钮一起藏起）；**点击/触碰桌宠**就会恢复。正在打字或输入框有焦点时不会隐藏。
 
 ## 🌐 联网搜索
 
-想让祈りちゃん上网查东西，说话里带上「**搜 / 搜索 / 查一下 / 百度 / 上网查**」等词即可，例如：
+想让祈りちゃん上网查东西，说话里带上「**搜 / 搜索 / 查一下 / 百度 / 上网查**」等词，或问一个具体问题时即可，例如：
 
 - 「帮我搜一下今天的新闻」
 - 「查查 Python 是什么」
 - 「百度一下明天北京天气」
+- 「什么是智能指针」
 
 祈りちゃん会用 DuckDuckGo / 中文维基百科搜索，把结果（含来源链接）反馈给你。
-搜索功能可以随时在 `pet/config.py` 里改 `SEARCH_ENABLED`、`SEARCH_TRIGGERS`、`SEARCH_MAX_RESULTS`。
+
+> **说明**：寒暄/闲聊（你好、哈哈、在吗、晚安…）会直接聊天、不联网，避免无关搜索干扰对话。可随时在 `pet/config.py` 里改 `SEARCH_ENABLED`、`SEARCH_ALWAYS`、`SEARCH_MAX_RESULTS`。
 
 > 需要联网；使用公开接口，无需 API Key。
 
@@ -96,7 +98,7 @@ py -3 -m venv .venv
 |------|------|
 | `codex` | Codex 小机器人（8 帧**待机动画**，会晃动） |
 
-**切换方法**：打开 `pet/config.py`，把 `PET_CHARACTER` 改成你想用的名字（如 `"remielle"`），保存后重启桌宠即可。
+**切换方法**：打开 `pet/config.py`，把 `PET_CHARACTER` 改成对应的名字，保存后重启桌宠即可。
 
 **添加新形象**：
 1. 在 `pet/resources/pets/` 新建一个文件夹（如 `mypet/`）
@@ -106,7 +108,6 @@ py -3 -m venv .venv
 
 素材来源（免费开源，禁止商用，个人使用没问题）：
 - [mypet-codex-pet](https://github.com/leanyu165-gif/mypet-codex-pet)（Codex）
-- [remielle-codex-pet](https://github.com/HanaAyane/remielle-codex-pet)（小蕾米）
 
 ## 💻 终端执行命令
 
@@ -135,15 +136,16 @@ py -3 -m venv .venv
 | `TEMPERATURE` | 采样温度 | `0.7` |
 | `MAX_HISTORY_TURNS` | 最近保留对话轮数（更久远自动压缩成摘要） | `10` |
 | `TYPEWRITER_*` | 打字机速度 | 每 14ms 打 1 字 |
-| `WINDOW_WIDTH/HEIGHT` | 窗口尺寸（更小省空间） | `250×380` |
+| `WINDOW_WIDTH/HEIGHT` | 窗口尺寸（更小省空间） | `220×330` |
 | `SEARCH_ENABLED` | 联网搜索开关 | `True` |
-| `SEARCH_ALWAYS` | 每句话是否都先联网再回答 | `True` |
+| `SEARCH_ALWAYS` | 真问题是否都先联网再回答 | `True` |
 | `SHOW_SOURCES` | 回复末尾是否附来源（默认关） | `False` |
 | `IDLE_SEMI_MS` | 无互动多久后气泡变半透明 | `6000` |
 | `IDLE_HIDE_MS` | 无互动多久后气泡/输入框/按钮隐身 | `10000` |
 | `BREAK_REMIND_ENABLED` | 久坐提醒开关 | `True` |
 | `BREAK_HOURS` | 累计使用到这些小时各提醒一次 | `(1,2,3,4,5)` |
 | `CHIME_ENABLED` | 整点报时开关 | `True` |
+| `TERMINAL_ENABLED` | 终端命令（`/+`）开关 | `True` |
 | `PAT_REPLIES`/`POKE_REPLIES` | 摸头/捏脸台词 | 见文件 |
 | `SYSTEM_PROMPT` | 祈りちゃん的人设 | 见文件 |
 
@@ -153,20 +155,26 @@ py -3 -m venv .venv
 
 ```
 pet/
-├── main.py          # 入口（窗口 + 托盘）
+├── main.py          # 入口（窗口 + 托盘 + 形象加载）
 ├── config.py        # 配置
-├── bridge.py        # Python <-> QML 桥接
+├── bridge.py        # Python <-> QML 桥接（对话/搜索/命令/提醒）
 ├── core/
-│   ├── memory.py    # 聊天记忆
-│   └── emotion.py   # 表情判定
+│   ├── memory.py        # 聊天记忆（含自动压缩摘要）
+│   ├── emotion.py       # 表情判定
+│   ├── message_model.py # 对话记录列表模型（含时间戳）
+│   ├── usage.py         # 系统闲置时间检测（久坐提醒）
+│   └── terminal.py      # 终端命令执行（/+）
 ├── llm/
-│   └── client.py    # Ollama 调用（后台线程）
+│   └── client.py    # Ollama 调用（后台线程 + 摘要压缩）
 ├── search/
 │   └── client.py    # 联网搜索（DuckDuckGo + 维基回退）
+├── resources/
+│   └── pets/        # 桌宠形象素材帧
 └── qml/
-    ├── PetWindow.qml    # 主窗口（紧凑布局）
-    ├── Character.qml    # 二次元角色 + 表情 + 互动
-    └── ChatBubble.qml   # 气泡 + 打字机
+    ├── PetWindow.qml    # 主窗口（紧凑布局、隐身、互动）
+    ├── Character.qml    # 角色（待机动画 + 摸头/捏脸）
+    ├── ChatBubble.qml   # 气泡（打字机 + 滚动 + 思考动画）
+    └── ChatWindow.qml   # 展开的对话记录窗口
 ```
 
 ## 🔮 后续规划（电脑控制模块预留）
