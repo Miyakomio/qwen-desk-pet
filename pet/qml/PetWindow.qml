@@ -73,7 +73,7 @@ Window {
         id: expandBtn
         anchors.top: parent.top
         anchors.left: parent.left
-        anchors.topMargin: 24
+        anchors.topMargin: 16
         anchors.leftMargin: 8
         width: 22; height: 22
         radius: 11
@@ -120,7 +120,7 @@ Window {
         id: closeBtn
         anchors.top: parent.top
         anchors.right: parent.right
-        anchors.topMargin: 24
+        anchors.topMargin: 16
         anchors.rightMargin: 8
         width: 22; height: 22
         radius: 11
