@@ -1,0 +1,13 @@
+# 虚拟环境 / 缓存 / 临时
+.venv/
+__pycache__/
+*.pyc
+.tmp/
+*.log
+
+# 桌宠临时调试
+pet_debug.log
+
+# 系统
+Thumbs.db
+.DS_Store
