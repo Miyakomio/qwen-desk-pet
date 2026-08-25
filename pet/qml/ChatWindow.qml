@@ -156,6 +156,22 @@ Window {
         border.color: "#ffd6e6"
         border.width: 1
 
+        // 占位提示（在输入框后面，空时才显示）
+        Text {
+            anchors.left: parent.left
+            anchors.right: sendBtn.left
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.leftMargin: 12
+            verticalAlignment: Text.AlignVCenter
+            text: "继续和祈りちゃん说…"
+            color: "#c0a6b2"
+            font.pixelSize: 13
+            font.family: "Microsoft YaHei"
+            visible: input.text === ""
+            z: 0
+        }
+
         TextInput {
             id: input
             anchors.left: parent.left
@@ -168,18 +184,8 @@ Window {
             font.family: "Microsoft YaHei"
             color: "#333333"
             selectByMouse: true
+            z: 1
             onAccepted: doSend()
-        }
-        Text {
-            anchors.fill: input
-            anchors.leftMargin: 12
-            verticalAlignment: Text.AlignVCenter
-            text: "继续和祈りちゃん说…"
-            color: "#c0a6b2"
-            font.pixelSize: 13
-            font.family: "Microsoft YaHei"
-            visible: input.text === ""
-            MouseArea { anchors.fill: parent; onClicked: input.forceActiveFocus() }
         }
         Rectangle {
             id: sendBtn
