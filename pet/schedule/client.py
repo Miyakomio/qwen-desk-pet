@@ -1,4 +1,4 @@
-"""日程表：独立窗口填写时间+事件，提前10分钟与到点时提醒。"""
+"""日程表：支持「指定时间(一次性)」与「固定时间(每天)」两类，提前10分钟+到点各提醒一次。"""
 import json
 import os
 import time as time_mod
@@ -15,17 +15,19 @@ _SCHEDULE_FILE = os.path.join(
 
 class ScheduleModel(QAbstractListModel):
     ID = Qt.ItemDataRole.UserRole + 1
-    DATE = Qt.ItemDataRole.UserRole + 2
-    TIME = Qt.ItemDataRole.UserRole + 3
-    EVENT = Qt.ItemDataRole.UserRole + 4
+    TYPE = Qt.ItemDataRole.UserRole + 2
+    DATE = Qt.ItemDataRole.UserRole + 3
+    TIME = Qt.ItemDataRole.UserRole + 4
+    EVENT = Qt.ItemDataRole.UserRole + 5
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.items = []   # list of dict
+        self.items = []
 
     def roleNames(self):
         return {
             self.ID: b"sid",
+            self.TYPE: b"stype",
             self.DATE: b"sdate",
             self.TIME: b"stime",
             self.EVENT: b"sevent",
@@ -39,13 +41,15 @@ class ScheduleModel(QAbstractListModel):
             return None
         it = self.items[index.row()]
         if role == self.ID:
-            return it["id"]
+            return it.get("id", "")
+        if role == self.TYPE:
+            return it.get("type", "daily")
         if role == self.DATE:
-            return it["date"]
+            return it.get("date", "")
         if role == self.TIME:
-            return it["time"]
+            return it.get("time", "")
         if role == self.EVENT:
-            return it["event"]
+            return it.get("event", "")
         return None
 
     def refresh(self):
@@ -54,7 +58,7 @@ class ScheduleModel(QAbstractListModel):
 
 
 class ScheduleManager(QObject):
-    remind = Signal(str)     # 需要显示的提醒文案（由桥接层转成气泡消息）
+    remind = Signal(str)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -67,9 +71,11 @@ class ScheduleManager(QObject):
             self._timer.start()
 
     @Slot(str, str, str)
-    def add(self, date: str, time: str, event: str):
+    def addOnce(self, date: str, time: str, event: str):
+        """指定时间（一次性）：date YYYY-MM-DD, time HH:MM。"""
         item = {
             "id": str(int(time_mod.time() * 1000)),
+            "type": "once",
             "date": (date or "").strip(),
             "time": (time or "").strip(),
             "event": (event or "").strip(),
@@ -77,6 +83,24 @@ class ScheduleManager(QObject):
             "notified_at": False,
         }
         if not item["date"] or not item["time"] or not item["event"]:
+            return
+        self.model.items.append(item)
+        self.model.refresh()
+        self._save()
+
+    @Slot(str, str)
+    def addDaily(self, time: str, event: str):
+        """固定时间（每天）：time HH:MM。"""
+        item = {
+            "id": str(int(time_mod.time() * 1000)),
+            "type": "daily",
+            "date": "",
+            "time": (time or "").strip(),
+            "event": (event or "").strip(),
+            "notified_pre_day": "",
+            "notified_at_day": "",
+        }
+        if not item["time"] or not item["event"]:
             return
         self.model.items.append(item)
         self.model.refresh()
@@ -96,31 +120,58 @@ class ScheduleManager(QObject):
     def checkDue(self):
         msgs = []
         now = datetime.now()
+        today = now.strftime("%Y-%m-%d")
         for it in self.model.items:
-            try:
-                dt = datetime.strptime(f"{it['date']} {it['time']}", "%Y-%m-%d %H:%M")
-            except Exception:  # noqa: BLE001
-                continue
-            rem = (dt - now).total_seconds()
-            # 提前10分钟告知（一次）
-            if not it["notified_pre"] and 0 < rem <= config.SCHEDULE_PRE_NOTIFY_SEC:
-                it["notified_pre"] = True
-                mins = max(1, int(round(rem / 60)))
-                msgs.append(f"已经{now:%H:%M:%S}了喵，还有约{mins}分钟就要「{it['event']}」啦哦")
-            # 到时间提醒（一次）
-            if not it["notified_at"] and rem <= 0 and rem > -3600:
-                it["notified_at"] = True
-                msgs.append(f"已经{now:%H:%M:%S}了喵，记得该「{it['event']}」哦")
+            if it.get("type") == "once":
+                self._check_once(it, now, msgs)
+            else:
+                self._check_daily(it, now, today, msgs)
         if msgs:
             self._save()
         return msgs
+
+    def _check_once(self, it, now, msgs):
+        try:
+            dt = datetime.strptime(f"{it['date']} {it['time']}", "%Y-%m-%d %H:%M")
+        except Exception:  # noqa: BLE001
+            return
+        rem = (dt - now).total_seconds()
+        if not it.get("notified_pre") and 0 < rem <= config.SCHEDULE_PRE_NOTIFY_SEC:
+            it["notified_pre"] = True
+            mins = max(1, int(round(rem / 60)))
+            msgs.append(f"已经{now:%H:%M}了喵，还有约{mins}分钟就要「{it['event']}」啦哦")
+        if not it.get("notified_at") and rem <= 0 and rem > -3600:
+            it["notified_at"] = True
+            msgs.append(f"已经{now:%H:%M}了喵，记得该「{it['event']}」哦")
+
+    def _check_daily(self, it, now, today, msgs):
+        try:
+            dt = datetime.strptime(f"{today} {it['time']}", "%Y-%m-%d %H:%M")
+        except Exception:  # noqa: BLE001
+            return
+        rem = (dt - now).total_seconds()
+        if it.get("notified_pre_day") != today and 0 < rem <= config.SCHEDULE_PRE_NOTIFY_SEC:
+            it["notified_pre_day"] = today
+            mins = max(1, int(round(rem / 60)))
+            msgs.append(f"已经{now:%H:%M}了喵，还有约{mins}分钟就要「{it['event']}」啦哦")
+        if it.get("notified_at_day") != today and rem <= 0 and rem > -3600:
+            it["notified_at_day"] = today
+            msgs.append(f"已经{now:%H:%M}了喵，记得该「{it['event']}」哦")
 
     # ---- 持久化 ----
     def _load(self):
         try:
             with open(_SCHEDULE_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
-            self.model.items = data if isinstance(data, list) else []
+            items = data if isinstance(data, list) else []
+            for it in items:
+                if not it.get("type"):
+                    it["type"] = "once" if it.get("date") else "daily"
+                it.setdefault("notified_pre", False)
+                it.setdefault("notified_at", False)
+                it.setdefault("notified_pre_day", "")
+                it.setdefault("notified_at_day", "")
+            self.model.items = items
         except Exception:  # noqa: BLE001
             self.model.items = []
 

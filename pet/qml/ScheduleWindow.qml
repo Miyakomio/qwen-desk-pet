@@ -28,50 +28,92 @@ Window {
         }
     }
 
-    // 输入表格
-    Grid {
+    property bool isOnce: false   // true=指定时间(一次性), false=固定时间(每天)
+
+    // 输入区
+    Column {
         anchors.top: header.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.margins: 12
-        columns: 2
-        columnSpacing: 8
-        rowSpacing: 8
-        leftPadding: 4
+        anchors.margins: 14
+        spacing: 12
 
-        Text { text: "日期"; color: "#666666"; font.pixelSize: 12 }
-        TextField {
-            id: dateInput
-            width: 150; height: 28
-            font.pixelSize: 13
-            font.family: "Microsoft YaHei"
-            placeholderText: "YYYY-MM-DD"
-            placeholderTextColor: "#c0a6b2"
-            color: "#333333"
-            background: Rectangle { radius: 6; color: "white"; border.color: "#f0c8d8"; border.width: 1 }
+        // 类型选择
+        Row {
+            spacing: 10
+            Rectangle {
+                width: 100; height: 28; radius: 14
+                color: win.isOnce ? "#ff8fb3" : "#ffffff"
+                border.color: "#ff8fb3"; border.width: 1
+                Text { anchors.centerIn: parent; text: "指定时间"; color: win.isOnce ? "white" : "#c94f79"; font.pixelSize: 13 }
+                MouseArea { anchors.fill: parent; onClicked: win.isOnce = true }
+            }
+            Rectangle {
+                width: 100; height: 28; radius: 14
+                color: win.isOnce ? "#ffffff" : "#ff8fb3"
+                border.color: "#ff8fb3"; border.width: 1
+                Text { anchors.centerIn: parent; text: "固定时间(每天)"; color: win.isOnce ? "#c94f79" : "white"; font.pixelSize: 13 }
+                MouseArea { anchors.fill: parent; onClicked: win.isOnce = false }
+            }
         }
-        Text { text: "时间"; color: "#666666"; font.pixelSize: 12 }
-        TextField {
-            id: timeInput
-            width: 150; height: 28
-            font.pixelSize: 13
-            font.family: "Microsoft YaHei"
-            placeholderText: "HH:MM"
-            placeholderTextColor: "#c0a6b2"
-            color: "#333333"
-            background: Rectangle { radius: 6; color: "white"; border.color: "#f0c8d8"; border.width: 1 }
+
+        // 日期（仅指定时间时显示）
+        Row {
+            spacing: 10
+            visible: win.isOnce
+            Rectangle {
+                width: 60; height: 28; radius: 6; color: "transparent"
+                Text { anchors.centerIn: parent; text: "日期"; color: "#666666"; font.pixelSize: 12 }
+            }
+            TextField {
+                id: dateInput
+                width: 150; height: 28
+                font.pixelSize: 13
+                font.family: "Microsoft YaHei"
+                placeholderText: "YYYY-MM-DD"
+                placeholderTextColor: "#c0a6b2"
+                color: "#333333"
+                background: Rectangle { radius: 6; color: "white"; border.color: "#f0c8d8"; border.width: 1 }
+            }
         }
-        Text { text: "事件"; color: "#666666"; font.pixelSize: 12 }
-        TextField {
-            id: eventInput
-            width: 150; height: 28
-            font.pixelSize: 13
-            font.family: "Microsoft YaHei"
-            placeholderText: "要做什么…"
-            placeholderTextColor: "#c0a6b2"
-            color: "#333333"
-            background: Rectangle { radius: 6; color: "white"; border.color: "#f0c8d8"; border.width: 1 }
-            onAccepted: win.doAdd()
+
+        // 时间
+        Row {
+            spacing: 10
+            Rectangle {
+                width: 60; height: 28; radius: 6; color: "transparent"
+                Text { anchors.centerIn: parent; text: "时间"; color: "#666666"; font.pixelSize: 12 }
+            }
+            TextField {
+                id: timeInput
+                width: 150; height: 28
+                font.pixelSize: 13
+                font.family: "Microsoft YaHei"
+                placeholderText: "HH:MM"
+                placeholderTextColor: "#c0a6b2"
+                color: "#333333"
+                background: Rectangle { radius: 6; color: "white"; border.color: "#f0c8d8"; border.width: 1 }
+            }
+        }
+
+        // 事件
+        Row {
+            spacing: 10
+            Rectangle {
+                width: 60; height: 28; radius: 6; color: "transparent"
+                Text { anchors.centerIn: parent; text: "事件"; color: "#666666"; font.pixelSize: 12 }
+            }
+            TextField {
+                id: eventInput
+                width: 150; height: 28
+                font.pixelSize: 13
+                font.family: "Microsoft YaHei"
+                placeholderText: "要做什么…"
+                placeholderTextColor: "#c0a6b2"
+                color: "#333333"
+                background: Rectangle { radius: 6; color: "white"; border.color: "#f0c8d8"; border.width: 1 }
+                onAccepted: win.doAdd()
+            }
         }
     }
 
@@ -79,7 +121,7 @@ Window {
     Rectangle {
         id: addBtn
         anchors.top: parent.top
-        anchors.topMargin: 150
+        anchors.topMargin: 196
         anchors.right: parent.right
         anchors.rightMargin: 14
         width: 84; height: 30; radius: 15
@@ -101,7 +143,7 @@ Window {
     ListView {
         id: list
         anchors.top: parent.top
-        anchors.topMargin: 196
+        anchors.topMargin: 238
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
@@ -124,7 +166,7 @@ Window {
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: 2
                 Text {
-                    text: model.sdate + "  " + model.stime
+                    text: model.stype === "once" ? (model.sdate + "  " + model.stime) : ("每天 " + model.stime)
                     color: "#c94f79"
                     font.pixelSize: 12
                     font.bold: true
@@ -156,17 +198,26 @@ Window {
     }
 
     function doAdd() {
-        var d = dateInput.text.trim()
         var t = timeInput.text.trim()
         var e = eventInput.text.trim()
-        if (d === "" || t === "" || e === "") {
-            dateInput.placeholderText = d === "" ? "请填日期!" : "YYYY-MM-DD"
-            timeInput.placeholderText = t === "" ? "请填时间!" : "HH:MM"
-            eventInput.placeholderText = e === "" ? "请填事件!" : "要做什么…"
-            return
+        if (win.isOnce) {
+            var d = dateInput.text.trim()
+            if (d === "" || t === "" || e === "") {
+                dateInput.placeholderText = d === "" ? "请填日期!" : "YYYY-MM-DD"
+                timeInput.placeholderText = t === "" ? "请填时间!" : "HH:MM"
+                eventInput.placeholderText = e === "" ? "请填事件!" : "要做什么…"
+                return
+            }
+            scheduleManager.addOnce(d, t, e)
+            dateInput.text = ""
+        } else {
+            if (t === "" || e === "") {
+                timeInput.placeholderText = t === "" ? "请填时间!" : "HH:MM"
+                eventInput.placeholderText = e === "" ? "请填事件!" : "要做什么…"
+                return
+            }
+            scheduleManager.addDaily(t, e)
         }
-        scheduleManager.add(d, t, e)
-        dateInput.text = ""
         timeInput.text = ""
         eventInput.text = ""
     }
