@@ -12,6 +12,7 @@ Window {
     property var patLines: ["嘿嘿~ ♥", "摸摸~", "好舒服呀~", "爱你~ ♥"]
     property var pokeLines: ["呀！", "别捏啦~", "唔…", "痛痛~"]
     property var idleSince: Date.now()
+    property bool _timeReported: false
 
     Timer {
         id: idleTimer
@@ -22,6 +23,12 @@ Window {
     }
 
     function markActive() {
+        // 待机隐藏一段时间后触碰：实时报一次当前时间
+        var idle = Date.now() - root.idleSince
+        if (idle >= configReportIdle && !root._timeReported) {
+            petBridge.reportTime(idle)
+            root._timeReported = true
+        }
         root.idleSince = Date.now()
         root.checkIdle()
     }
@@ -36,7 +43,7 @@ Window {
         }
         var el = Date.now() - root.idleSince
         var t, btnT
-        if (el > configIdleHide) { t = 0; btnT = 0 }        // 隐身（按钮一起藏）
+        if (el > configIdleHide) { t = 0; btnT = 0; root._timeReported = false }  // 隐身（下次触碰可报时）
         else if (el > configIdleSemi) { t = 0.45; btnT = 1 } // 半透明
         else { t = 1; btnT = 1 }
         bubble.opacity = t

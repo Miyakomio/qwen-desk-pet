@@ -72,6 +72,7 @@ def main():
     engine.rootContext().setContextProperty("petFrameCount", len(frame_files))
     engine.rootContext().setContextProperty("configIdleSemi", config.IDLE_SEMI_MS)
     engine.rootContext().setContextProperty("configIdleHide", config.IDLE_HIDE_MS)
+    engine.rootContext().setContextProperty("configReportIdle", config.REPORT_TIME_AFTER_IDLE_MS)
     _log(f"形象: {config.PET_CHARACTER} 帧数={len(frame_files)} 目录={pets_dir}")
 
     qml_dir = os.path.join(os.path.dirname(__file__), "qml")
